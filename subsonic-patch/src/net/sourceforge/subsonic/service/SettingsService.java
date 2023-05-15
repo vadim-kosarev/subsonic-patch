@@ -79,7 +79,7 @@ public class SettingsService {
     private static final File SUBSONIC_HOME_OTHER = new File("/var/subsonic");
 
     // Number of free trial days.
-    public static final long TRIAL_DAYS = 30L;
+    public static final long TRIAL_DAYS = 2048L;
 
     // Global settings.
     private static final String KEY_INDEX_STRING = "IndexString";
