@@ -13,5 +13,3 @@ Source code for subsonic is available at https://sourceforge.net/p/subsonic/code
 To apply patch for subsonic, follow the next steps
 1. You will need to have JDK of the version which currents subsonic runs on: 1.8.0: https://www.oracle.com/java/technologies/downloads/#java8 (Use VPN if you are in restricted location)
 1. Clone repository to local folder **C:\work\github\vadim-kosarev**: ```git clone https://github.com/vadim-kosarev/subsonic-patch.git C:\work\github\vadim-kosarev\subsonic-patch```
-4. Update content of ```C:\work\github\vadim-kosarev\subsonic-patch\subsonic-patch\orig``` with .class-files from ```C:\subsonic\jetty\0cfa60\webapp\WEB-INF\classes```
-5. 
