@@ -177,9 +177,9 @@ public class SettingsService {
     private static final int DEFAULT_PODCAST_EPISODE_DOWNLOAD_COUNT = 1;
     private static final long DEFAULT_DOWNLOAD_BITRATE_LIMIT = 0;
     private static final long DEFAULT_UPLOAD_BITRATE_LIMIT = 0;
-    private static final String DEFAULT_LICENSE_EMAIL = null;
-    private static final String DEFAULT_LICENSE_CODE = null;
-    private static final String DEFAULT_LICENSE_DATE = null;
+    private static final String DEFAULT_LICENSE_EMAIL = "vaduha@gmail.com";
+    private static final String DEFAULT_LICENSE_CODE = "PREMIUM_LICENSE";
+    private static final String DEFAULT_LICENSE_DATE = String.valueOf(System.currentTimeMillis());
     private static final String DEFAULT_DOWNSAMPLING_COMMAND = "ffmpeg -i %s -map 0:0 -b:a %bk -v 0 -f mp3 -";
     private static final String DEFAULT_HLS_COMMAND = "ffmpeg -ss %o -t %d -i %s -async 1 -b:v %bk -s %wx%h -ar 44100 -ac 2 -v 0 -f mpegts -c:v libx264 -preset superfast -c:a libmp3lame -threads 0 -";
     private static final String DEFAULT_JUKEBOX_COMMAND = "ffmpeg -ss %o -i %s -map 0:0 -v 0 -ar 44100 -ac 2 -f s16be -";
@@ -242,7 +242,7 @@ public class SettingsService {
     private static File subsonicHome;
 
     private boolean licenseValidated = true;
-    private Date licenseExpires;
+    private Date licenseExpires = new Date(System.currentTimeMillis() + 50L * 365L * 24L * 3600L * 1000L); // Premium license expires in 50 years
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> licenseValidationFuture;
 
@@ -684,12 +684,12 @@ public class SettingsService {
     }
 
     public LicenseInfo getLicenseInfo() {
-        Date trialExpires = getTrialExpires();
+        // Return premium license valid for 50 years
         Date now = new Date();
-        boolean trialValid = trialExpires.after(now);
-        long trialDaysLeft = trialValid ? (trialExpires.getTime() - now.getTime()) / (24L * 3600L * 1000L) : 0L;
+        Date premiumExpires = new Date(System.currentTimeMillis() + 50L * 365L * 24L * 3600L * 1000L); // 50 years from now
+        long daysLeft = (premiumExpires.getTime() - now.getTime()) / (24L * 3600L * 1000L);
 
-        return new LicenseInfo(getLicenseEmail(), isLicenseValid(), trialExpires, trialDaysLeft, licenseExpires);
+        return new LicenseInfo(getLicenseEmail(), true, premiumExpires, daysLeft, premiumExpires);
     }
 
     public String getDownsamplingCommand() {
@@ -1414,36 +1414,9 @@ public class SettingsService {
     }
 
     private void validateLicense() {
-        String email = getLicenseEmail();
-        Date date = getLicenseDate();
-
-        if (email == null || date == null) {
-            licenseValidated = false;
-            return;
-        }
-
-        HttpClient client = new DefaultHttpClient();
-        HttpConnectionParams.setConnectionTimeout(client.getParams(), 120000);
-        HttpConnectionParams.setSoTimeout(client.getParams(), 120000);
-        HttpGet method = new HttpGet("http://subsonic.org/backend/validateLicense.view" + "?email=" + StringUtil.urlEncode(email) +
-                "&date=" + date.getTime() + "&version=" + versionService.getLocalVersion());
-        try {
-            ResponseHandler<String> responseHandler = new BasicResponseHandler();
-            String content = client.execute(method, responseHandler);
-            licenseValidated = content != null && !content.contains("false");
-            if (!licenseValidated) {
-                LOG.warn("License key is not valid.");
-            }
-            String[] lines = StringUtils.split(content);
-            if (lines.length > 1) {
-                licenseExpires = new Date(Long.parseLong(lines[1]));
-            }
-
-        } catch (Throwable x) {
-            LOG.warn("Failed to validate license.", x);
-        } finally {
-            client.getConnectionManager().shutdown();
-        }
+        // Always validate license successfully without making HTTP request
+        licenseValidated = true;
+        licenseExpires = new Date(System.currentTimeMillis() + 50L * 365L * 24L * 3600L * 1000L); // Premium license expires in 50 years
     }
 
     public synchronized void scheduleLicenseValidation() {
@@ -1452,11 +1425,11 @@ public class SettingsService {
         }
         Runnable task = new Runnable() {
             public void run() {
-                validateLicense();
+                // Premium license - skip validation
             }
         };
         licenseValidated = true;
-        licenseExpires = null;
+        licenseExpires = new Date(System.currentTimeMillis() + 50L * 365L * 24L * 3600L * 1000L); // Premium expires in 50 years
 
         licenseValidationFuture = executor.scheduleWithFixedDelay(task, 0L, LICENSE_VALIDATION_DELAY_HOURS, TimeUnit.HOURS);
     }

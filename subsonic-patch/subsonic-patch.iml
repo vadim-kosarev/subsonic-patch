@@ -95,11 +95,12 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="file://$MODULE_DIR$/../../../../../subsonic/jetty/0cfa60/webapp/WEB-INF/classes" />
+          <root url="file://$MODULE_DIR$/subsonic-installed/jetty/0cfa60/webapp/WEB-INF/classes" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="accessors-smart-1.2" level="project" />
   </component>
 </module>
